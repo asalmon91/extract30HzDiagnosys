@@ -1,4 +1,4 @@
-function amp_30Hz_nV_ch1_ch2 = procDiagnosysisFile(in_ffname, display_results)
+function [amp_30Hz_nV_ch1_ch2, f_out] = procDiagnosysisFile(in_ffname)
 %procDiagnosysisFile TODO: Documentation!
 % TODO: Contents Table and Data Table TOC could make it simpler to find things
 % TODO: do more than just 30Hz
@@ -14,7 +14,7 @@ TRG_STIM_SUBSTR = '30Hz';
 
 % Data
 DATA_TABLE_LABEL = 'Data Table';
-CHANNEL_LABEL = 'Chan';
+% CHANNEL_LABEL = 'Chan';
 DATA_START = 4; % 4th row of raw
 
 %% Read the whole table
@@ -77,7 +77,7 @@ f = -Fs/2:dF:Fs/2-dF;           % hertz
 %% Extract 30Hz amplitude
 % Filter spectrum to 30±10Hz band
 % TODO: don't hard-code so bad
-f_filt = f > 30 - 10/2 & f < 30 + 10/2;
+f_filt = f >= 26 & f <= 34;
 ch1_30Hz_amp_nV = interp1(f(f_filt), c1_fft(f_filt), 30);
 ch2_30Hz_amp_nV = interp1(f(f_filt), c2_fft(f_filt), 30);
 
@@ -88,14 +88,14 @@ ch2_30Hz_amp_nV = interp1(f(f_filt), c2_fft(f_filt), 30);
 amp_30Hz_nV_ch1_ch2 = [ch1_30Hz_amp_nV; ch2_30Hz_amp_nV];
 
 %% Plot the spectrum:
-if exist('display_results', 'var') && display_results
+if nargout == 2
 	legend_labels = {'Ch1', 'Ch2', 'Ch1 30Hz', 'Ch2 30Hz'};
 	fnm = 'arial';
 	fsz = 16;
 	fw = 'bold';
 
 	% Raw signal
-	figure;
+	f_out = figure;
 	subplot(1,3,1);
 	hold on;
 	plot(t_ms, c1_nV./1e3, '-r');

@@ -27,11 +27,29 @@ for ii=1:numel(search_results)
 	end
 	
 	% Process File
-	display_on = true;
-	amps(ii, :) = procDiagnosysisFile(search_results(ii).name, display_on);
+	[amps(ii, :), f_out] = procDiagnosysisFile(search_results(ii).name);
+    
+    % Save figure with raw data
+    [xls_path, xls_name, ~] = fileparts(search_results(ii).name);
+    savefig(f_out, fullfile(xls_path, sprintf('%s.fig', xls_name)));
 end
 
+%% Create a report
+ffnames = {search_results.name}';
+[in_paths, in_names, ~] = cellfun(@fileparts, ffnames, 'UniformOutput', false);
 
+% Remove any incompatible files
+remove = any(isnan(amps), 2);
+in_paths(remove) = [];
+in_names(remove) = [];
+amps(remove, :) = [];
 
+% Construct a table
+tbl_header = {'Path', 'File name', 'Ch1 (nV)', 'Ch2 (nV)'};
+tbl = [tbl_header; [in_paths, in_names, num2cell(amps)]];
 
+% Write report
+path_out = path_root;
+fname_out = 'Summary_30Hz.xlsx';
+writecell(tbl, fullfile(path_out, fname_out));
 
